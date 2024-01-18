@@ -78,6 +78,42 @@ def iniciar_desafio(request):
 
         desafio.save()
 
+        for categoria in categorias:
+            desafio.categoria.add(categoria)
         
+        flashcards =(
+            Flashcard.objects.filter(user=request.user)
+            .filter(dificuldade=dificuldade)
+            .filter(categoria_id__in=categorias)
+            .order_by('?')
+            )
+        
+        if flashcards.count() < int(qtd_perguntas):
+            messages.add_message(request, constants.WARNING, 'Qtd de perguntas Maior ou Inferior a qtd de Flashcard')
+            return redirect('/flashcard/iniciar_desafio/')
+        
+        
+        flashcards = flashcards[: int(qtd_perguntas)]
+        
+        for f in flashcards:
+            flashcard_desafio = FlashcardDesafio(
+                flashcard = f
+            )
+            flashcard_desafio.save()
+            desafio.flashcards.add(flashcard_desafio)
 
-        return render(request, '')
+        desafio.save()         
+   
+        return redirect('/flashcard/listar_desafio/')
+    
+    
+def listar_desafio(request):
+    desafios = Desafio.objects.filter(user=request.user)
+    #status = Desafio.objects.filter(status=status)                # Criar os status, e os filtros
+    return render(request, 'listar_desafio.html', {'desafios': desafios})
+
+
+def desafio(request, id):
+    desafio = Desafio.objects.get(id=id)
+    if request.method == 'GET':
+        return render(request, 'desafio.html', {'desafio': desafio})

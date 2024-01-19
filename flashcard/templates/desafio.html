@@ -13,6 +13,9 @@
 
 
 {% block 'conteudo' %}
+
+    {% include "partials/header.html" %}
+    
     <div class="container">
         <br>
         <br>
@@ -25,7 +28,7 @@
                 <br>
                 <br>
                 {% for flash in desafio.flashcards.all %}
-                    <div class="box-new-flashcard">
+                    <div class="box-new-flashcard {% if flash.respondido %}op2{% endif %}">
                         <div class="flashcard {{flash.flashcard.css_dificuldade}}">
 
                             <div class="flashcard-categoria">
@@ -37,12 +40,19 @@
                                 <p class="flashcard-item">{{flash.flashcard.pergunta}}</p>
                             </div>
 
-                            
-                            <div class="responder">
-                                <a href=""><i class='bx bxs-x-square icone-vermelho'></i></a>
-                                <a href=""><i class='bx bxs-check-square icone-verde' ></i></a>
-                            </div>
-                            
+                            {% if not flash.respondido %}
+                                <div class="responder">
+                                    <a href="{% url "responder_flashcard" flash.id %}?acertou=0&desafio_id={{desafio.id}}"><i class='bx bxs-x-square icone-vermelho'></i></a>
+                                    <a href="{% url "responder_flashcard" flash.id %}?acertou=1&desafio_id={{desafio.id}}"><i class='bx bxs-check-square icone-verde' ></i></a>
+                                </div>
+                            {% else %}
+                                {% if flash.acertou %}
+                                    <span class="badge bg-success">Acertou</span>
+                                {% else %}
+                                    <span class="badge bg-danger">Errou</span>
+                                {% endif %}
+
+                            {% endif %}
                             
                         </div>
                         <div class="resposta-flashcard" id="{{flash.id}}">
@@ -57,9 +67,9 @@
             <div class="col-md">
 
                 <h3 class="fonte-secundaria">Resultado</h3>
-                <p class="fonte-p">Acertos: </p>
-                <p class="fonte-p">Erros: </p>
-                <p class="fonte-p">Faltantes: </p>
+                <p class="fonte-p">Acertos: {{acertos}} </p>
+                <p class="fonte-p">Erros: {{erros}}</p>
+                <p class="fonte-p">Faltantes: {{faltantes}}</p>
                 <br>
                 <a class="btn-cadastro btn-desafio" href="">Relatório detalhado</a>
             </div>
